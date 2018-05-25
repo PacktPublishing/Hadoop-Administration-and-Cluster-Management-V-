@@ -1,0 +1,86 @@
+http://apache.mirror.amaze.com.au/zookeeper/; untar it and set “ZK_HOME”
+
+As user hadoop
+
+$ vi .bash_profile
+
+export ZK_HOME=/home/hadoop/zoo
+PATH=$ZK_HOME/bin:$PATH
+ 
+Configuration:
+
+$ vi /home/hadoop/zoo/zoo.cfg
+
+dataDir=/data/zookeeper
+
+server.1=nn1.dilithium.com:2888:3888
+server.2=dn1.dilithium.com:2888:3888
+server.3=dn2.dilithium.com:2888:3888
+
+This must be done on all the nodes where zookeeper will run.
+
+$ mkdir -p /data/zookeeper on all three nodes
+
+
+$ ./zoo/bin/zkServer.sh start  
+$ ./zoo/bin/zkCli.sh -server nn1.dilithium.com:2181
+
+
+Verify ZooKeeper
+
+$ echo ruok | nc `hostname` 2181
+$ echo stat | nc `hostname` 2181
+$ echo mntr | nc `hostname` 2181
+
+
+Planning HDFS
+
+$ vi /home/hadoop/hadoop/etc/hadoop/slaves
+
+dn1.dilithium.com
+dn2.dilithium.com
+dn3.dilithium.com
+
+
+We can start the services across the nodes from master node.
+
+HDFS Daemons:
+$ start-dfs.sh
+$ stop-dfs.sh
+
+We can start the Yarn services across the nodes from master node.
+
+YARN Daemons:
+
+$ start-yarn.sh
+$ stop-yarn.sh
+
+
+Spark Setup:
+
+Download it from https://spark.apache.org/downloads.html
+
+Untar the package and setup the environment variables.
+
+The Spark jars and libraries must be in the path for execution
+
+export LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native:$LD_LIBRARY_PATH
+
+spark-defaults.conf
+
+# Example:
+spark.master                       	yarn
+spark.eventLog.enabled    		true
+spark.driver.memory         		512m
+spark.serializer                    	org.apache.spark.serializer.KryoSerializer
+spark.eventLog.dir              	hdfs://nn1.dilithium.com:9000/spark_logs
+spark.history.fs.logDirectory     	hdfs://node-master:9000/spark-logs
+spark.history.provider            	org.apache.spark.deploy.history.FsHistoryProvider
+spark.history.fs.update.interval  	10s
+spark.history.ui.port             	18080
+
+Start the History Server
+
+$SPARK_HOME/sbin/start-history-server.sh
+
+

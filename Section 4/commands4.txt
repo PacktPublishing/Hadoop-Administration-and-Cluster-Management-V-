@@ -1,0 +1,106 @@
+$ hdfs dfsadmin 
+
+HDFS Health
+
+$ hdfs fsck /
+$ hdfs fsck / -list-corruptfileblocks
+$ hdfs fsck / -delete
+$ hdfs fsck / -move
+
+Balance the blocks across the nodes in the cluster.
+
+$ hdfs balancer
+$ hdfs balancer –threashold 20
+
+Replication - hdfs-site.xml
+
+<property>
+<name>dfs.replication</name>
+<value>1</value>
+</property>
+
+Block Size - hdfs-site.xml
+
+<property>
+<name>dfs.blocksize</name>
+<value>134217728</value>
+</property>
+
+We can find the location of blocks for a file:
+
+$ hadoop fsck /file –files –blocks –racks -locations
+
+
+yarn-site.xml
+
+<property>
+<name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+<value>org.apache.hadoop.mapred.ShuffleHandler</value>
+</property>
+
+<property>
+<name>yarn.nodemanager.aux-services</name>
+<value>mapreduce_shuffle</value>
+</property>
+
+Resource manager - yarn-site.xml
+
+<property>
+<name>yarn.resourcemanager.resource-tracker.address</name>
+<value>nn1.dilithium.com:9001</value>
+</property>
+
+<property>
+<name>yarn.resourcemanager.scheduler.address</name>
+<value>nn1.dilithium.com:9002</value>
+</property>
+
+<property>
+<name>yarn.resourcemanager.address</name>
+<value>nn1.dilithium.com:9003</value>
+</property>
+
+
+HDFS copy operations
+
+$ hadoop fs –put <file> /
+$ hadoop fs –copyFromLocal <file> /
+$ hdfs dfs –put <file> /
+
+$ hadoop fs –get /<file> .
+$ hadoop fs –copyToLocal /<file> .
+$ hdfs dfs –get /<file> .
+
+$ hadoop fs –cp /<file> /path
+$ hadoop fs –mv /<file> /path
+
+Distcp
+
+Runs MapReduce to do the copy operation.
+
+$ hadoop distcp /source /dest
+
+
+Spark Shuffle - yarn-site.xml
+
+<property>
+<name>yarn.nodemanager.aux-services.spark_shuffle.class</name>
+<value>org.apache.spark.network.yarn.YarnShuffleService</value>
+</property>
+
+<property>
+<name>yarn.nodemanager.aux-services.spark2_shuffle.class</name>
+<value>org.apache.spark.network.yarn.YarnShuffleService</value>
+</property>
+
+<property>
+<name>yarn.nodemanager.aux-services</name>
+<value>mapreduce_shuffle,spark_shuffle,spark2_shuffle</value>
+</property>
+
+
+Spark Execution
+
+$ spark-submit --class org.apache.spark.examples.SparkPi spark/examples/jars/spark-examples_2.11-2.4.0-SNAPSHOT.jar 10 --master yarn --deploy-mode master
+
+$ spark-submit --class org.apache.spark.examples.SparkPi spark/examples/jars/spark-examples_2.11-2.4.0-SNAPSHOT.jar 10 --master yarn --deploy-mode client

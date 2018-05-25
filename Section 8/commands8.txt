@@ -1,0 +1,45 @@
+$ grep –i acl /boot/config*
+# yum install acl libacl
+
+Check mounted file system for ACLs Support:
+
+# tune2fs –l /dev/sda1 | grep acl
+
+
+Linux Examples
+
+$ getfacl <filename>
+$ setfacl –m d:o:rx file
+$ setfacl –m u:aman:rw test; getfacl test
+$ setfacl –x ACL file; $ setfacl –b file (remove acl)
+
+Lets created two users and make them part of same group.
+# useradd user1; useradd user2
+# groupadd sales; usermod –G sales user1 and user2
+# mkdir /projects; chown user1 /projects
+# getfacl /projects
+
+Switch as user “user1” and create a directory under projects.
+# su – user1; cd /projects; mkdir example
+$ setfacl –m u:user1:rwx example
+$ setfacl –m u: user2:r– example; $ setfacl –m other:--- example
+
+HDFS Examples
+
+Enable ACL in “hdfs-site.xml”
+
+	<property>
+	<name>dfs.namenode.acls.enabled</name>
+	<value>true</value>
+	</property>
+
+$ hdfs dfs -getfacl <filename>
+$ hdfs dfs -setfacl –m default:group:rx /projects
+$ hdfs dfs -setfacl –m user:aman:--- test
+
+
+User impersonate
+
+export HADOOP_USER_NAME=hadoop
+
+

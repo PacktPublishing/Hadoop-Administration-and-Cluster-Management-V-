@@ -1,0 +1,14 @@
+Namenode: - http://ip:50070
+Datanode: - http://ip:50075/blockScannerReport
+RM:- http://ip:8088
+
+$ hdfs dfsadmin -report
+
+
+JMX
+
+curl -i http://localhost:50070/jmx
+curl or web browser:
+
+http://localhost:50070/jmx?qry=Hadoop:service=NameNode,name=NameNodeInfo
+http://<namenodehost>:50070/jmx?qry=java.lang:type=Memory

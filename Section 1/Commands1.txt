@@ -1,0 +1,97 @@
+$ git clone https://github.com/netxillon/hadoop.git hadoop_cluster
+$ cd hadoop_cluster/
+$ vagrant list-commands
+$ vagrant init ubuntu/trusty64
+$ vagrant up
+$ vagrant destroy
+
+# yum install jdk or # rpm -ivh jdk-1.8*
+# chkconfig iptables off; service iptables stop
+# vi /etc/selinux/config and change selinux=disabled
+# vi /etc/resolv.conf points to nameserver
+
+Build Hadoop
+
+1. yum install gcc gcc-c++ openssl-devel make cmake jdk-1.7u45(minimum)
+
+2. Download Maven: wget http://mirrors.gigenet.com/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+
+	tar -zxf apache-maven-3.3.9-bin.tar.gz -C /opt/
+	
+	setup maven environment
+	
+	[root@repo67 ~]# cat /etc/profile.d/maven.sh
+	export JAVA_HOME=/usr/java/latest
+	export M3_HOME=/opt/apache-maven-3.3.9
+	export PATH=$JAVA_HOME/bin:/opt/apache-maven-3.3.9/bin:$PATH
+	
+3. Download protobuf: wget https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz
+
+	tar -xzf protobuf-2.5.0.tar.gz -C /root
+	
+	cd /opt/protobuf-2.5.0/
+	./configure
+	make;make install
+	
+4. Download latest stable hadoop source code , example hadoop-2.7.3-src.tar.gz
+
+	tar -xzf hadoop-2.7.3-src.tar.gz -C /opt/
+	cd /opt/hadoop-2.7.3-src
+	mvn package -Pdist,native -DskipTests -Dtar
+	
+you will see a tar ball under hadoop-2.7.3-src/hadoop-dist/target/
+
+Install Hadoop
+
+# useradd hadoop
+# su - hadoop
+
+$ tar –xzvf hadoop-2.7.3.tar.gz –C /home/hadoop/hadoop
+$ ln -s hadoop-2.7.3 hadoop
+
+Setup ".bash_profile"
+
+export HADOOP_HOME=/home/hadoop/hadoop
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+export YARN_CONF_DIR=$HADOOP_HOME/etc/hadoop
+
+export JAVA_HOME=/usr/java/jdk1.8.0_45/
+
+PATH=$HADOOP_HOME/bin/:$HADOOP_HOME/sbin/:$JAVA_HOME/bin/:$PATH
+
+Hadoop Configuration files:
+
+core-site.xml
+-------------
+
+<configuration>
+
+<property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://nn1.dilithium.com:9000</value>
+</property>
+
+</configuration>
+
+hdfs-site.xml
+
+<property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file:/data/namenode</value>
+</property>
+
+<property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:/data/datanode</value>
+</property>
+
+Commands to start services:
+
+$ hadoop namenode –format
+$ hadoop-daemon.sh start namenode
+$ hadoop-daemon.sh start datanode
+

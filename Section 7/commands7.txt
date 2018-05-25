@@ -1,0 +1,136 @@
+Namenode HA
+
+core-site.xml on master and datanodes
+
+<property>
+<name>fs.defaultFS</name>
+<value>hdfs://mycluster</value>
+</property>
+
+<property>
+<name>ha.zookeeper.quorum</name>
+<value>nn1.dilithium.com:2181,nn2.dilithium.com:2181,jt.dilithium.com:2181</value>
+</property>
+
+Namenodes - hdfs-site.xml
+
+<property>
+<name>dfs.nameservices</name>
+<value>mycluster</value>
+</property>
+
+<property>
+<name>dfs.ha.namenodes.mycluster</name>
+<value>nn1,nn2</value>
+</property>
+
+<property>
+<name>dfs.namenode.rpc-address.mycluster.nn1</name>
+<value>nn1.dilithium.com:9000</value>
+</property>
+
+<property>
+<name>dfs.namenode.rpc-address.mycluster.nn2</name>
+<value>nn2.dilithium.com:9000</value>
+</property>
+
+<property>
+<name>dfs.namenode.http-address.mycluster.nn1</name>
+<value>nn1.dilithium.com:50070</value>
+</property>
+
+<property>
+<name>dfs.namenode.http-address.mycluster.nn2</name>
+<value>nn2.dilithium.com:50070</value>
+</property>
+
+<property>
+<name>dfs.ha.automatic-failover.enabled</name>
+<value>true</value>
+</property>
+
+<property>
+<name>dfs.journalnode.edits.dir</name>
+<value>/data/mycluster</value>
+</property>
+
+<property>
+<name>dfs.namenode.shared.edits.dir</name>
+<value>qjournal://nn1.dilithium.com:8485;nn2.dilithium.com:8485;jt.dilithium.com:8485/mycluster</value>
+</property>
+
+<property>
+<name>dfs.client.failover.proxy.provider.mycluster</name>
+<value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+</property>
+
+<property>
+  <name>dfs.ha.fencing.ssh.private-key-files</name>
+      <value>/home/hadoop/.ssh/id_rsa</value>
+      </property>
+
+<property>
+  <name>dfs.ha.fencing.methods</name>
+      <value>sshfence
+                   shell(/bin/true)
+                                  </value>
+</property>
+
+On Datanode - hdfs-site.xml
+
+
+<property>
+<name>dfs.nameservices</name>
+<value>mycluster</value>
+</property>
+
+<property>
+<name>dfs.ha.namenodes.mycluster</name>
+<value>nn1,nn2</value>
+</property>
+
+<property>
+<name>dfs.namenode.rpc-address.mycluster.nn1</name>
+<value>nn1.dilithium.com:9000</value>
+</property>
+
+<property>
+<name>dfs.namenode.rpc-address.mycluster.nn2</name>
+<value>nn2.dilithium.com:9000</value>
+</property>
+
+<property>
+<name>dfs.client.failover.proxy.provider.mycluster</name>
+<value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+</property>
+
+Steps for HA
+
+1. Setup zookeeper quorum and make sure they are running
+	- ./zookeeper-3.4.5/bin/zkServer.sh start
+  	- ./zookeeper-3.4.5/bin/zkCli.sh
+  	- ./zookeeper-3.4.5/bin/zkCli.sh -server nn1.cluster1.com:2181
+
+2. Setup core and hdfs file on each node as given.
+
+3. Start Journalnode on all journal node machines
+	- hadoop-daemon.sh start journalnode
+
+4. Format namenode
+	- hdfs namenode -format
+
+5. Format zkFC
+	- hdfs zkfc -formatZK
+
+6. Start namenode
+	- hadoop-daemon.sh start namenode
+
+7. Start ZKFC
+	- hadoop-daemon.sh start zkfc
+
+8. Bootstrap StandbyNamenode
+	- hdfs namenode -bootstrapStandby
+
+9. Start Namenode on standby
+
+10. Start ZKFC on standy

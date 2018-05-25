@@ -1,0 +1,17 @@
+Add nodes to “include” file or to remove add to “exclude” file
+$ hdfs dfsadmin -refreshNodes
+$ hdfs rmadmin -refreshNodes
+
+hdfs-site.xml on master
+
+<property>
+    <name>dfs.hosts.exclude</name>
+    <value>/home/hadoop/excludes</value>
+</property>
+
+yarn-site.xml of RM
+
+<property>
+    <name>mapred.hosts.exclude</name>
+    <value>/home/hadoop/excludes</value>
+</property>
